@@ -1,15 +1,39 @@
-pipeline {
-    agent {
-        docker {
-            image 'maven:3.9.0-eclipse-temurin-11' 
-            args '-v /root/.m2:/root/.m2' 
-        }
+pipeline{
+    agent any
+    stages{
+        stage('PreBuildCleanUp'){
+            steps{
+ 
+    cleanWs()
+    dir("${env.WORKSPACE}@tmp") {
+      deleteDir()
     }
-    stages {
-        stage('Build') { 
-            steps {
-                sh 'mvn -B -DskipTests clean package' 
+    dir("${env.WORKSPACE}@script") {
+      deleteDir()
+    }
+    dir("${env.WORKSPACE}@script@tmp") {
+      deleteDir()
+    }
+  
+}
+            }
+        
+        stage('Build'){
+            steps{
+                
+                bat 'git clone https://github.com/Thanu-personal/SampleMavenProject.git'
+            }
+        }
+        stage('Test'){
+            steps{
+             bat 'mvn test -f SampleMavenProject'
+            }
+        }
+        stage('Deploy'){
+            steps{
+              bat 'mvn package -f SampleMavenProject'  
             }
         }
     }
+   
 }
